@@ -45,8 +45,8 @@ bool EntryPrinter::shouldIgnoreEntry(const PrintableEntryBegin &Entry) {
     return true;
   }
   // (2) Regexes:
-  if ( ( CoRegex && ( std::regex_match(Entry.Name, *CoRegex) ) ) || 
-       ( IdRegex && ( std::regex_match(Entry.Name, *IdRegex) ) ) ) {
+  if ( ( CoRegex && ( std::regex_search(Entry.Name, *CoRegex) ) ) || 
+       ( IdRegex && ( std::regex_search(Entry.Name, *IdRegex) ) ) ) {
     skipEntry();
     return true;
   }
@@ -146,13 +146,13 @@ void EntryPrinter::readBlacklists(const std::string& BLFilename) {
   std::string curLine, CoPattern, IdPattern;
   
   while( std::getline(file_in, curLine) ) {
-    if( std::regex_match(curLine, findCo) ) {
+    if( std::regex_search(curLine, findCo) ) {
       if(!CoPattern.empty())
         CoPattern += '|';
       CoPattern += '(';
       CoPattern.append(curLine.begin()+8, curLine.end());
       CoPattern += ')';
-    } else if( std::regex_match(curLine, findId) ) {
+    } else if( std::regex_search(curLine, findId) ) {
       if(!IdPattern.empty())
         IdPattern += '|';
       IdPattern += '(';
@@ -161,8 +161,12 @@ void EntryPrinter::readBlacklists(const std::string& BLFilename) {
     }
   }
   
-  CoRegex.reset(new std::regex(CoPattern));
-  IdRegex.reset(new std::regex(IdPattern));
+  if (!CoPattern.empty()) {
+    CoRegex.reset(new std::regex(CoPattern));
+  }
+  if (!IdPattern.empty()) {
+    IdRegex.reset(new std::regex(IdPattern));
+  }
   return;
 }
 
